@@ -12,12 +12,12 @@
     <title>Rate My Professors</title>
   </head>
   <body style="background-color:#E9D5DA">
-  <form th:action="@{/search}" method="get" class="position-fixed" style="width:80%;left:10%;right:10%;height:10%;top:45%;bottom:45%">
+  <form th:action="@{/search}" method="post" class="position-fixed" style="width:80%;left:10%;right:10%;height:10%;top:45%;bottom:45%">
   	<div class="d-flex row position-fixed" style="width:80%;left:10%;right:10%;height:10%;top:45%;bottom:45%">
   		<div class="flex-grow-1" style="padding:0px 5px 0px 0px">
   			<div class="form-group">
   				<label for="profName">Name</label>
-    			<input type="text" class="form-control bg-light border-0 shadow" style="border-radius:30px" id="profName" placeholder="Severus Snape">
+    			<input type="text" th:name="profName" class="form-control bg-light border-0 shadow" style="border-radius:30px" id="profName" placeholder="Severus Snape">
   			</div>
   		</div>
   		<div class="flex-grow-1" style="padding:0px 5px 0px 5px">
