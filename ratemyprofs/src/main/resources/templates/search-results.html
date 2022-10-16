@@ -44,19 +44,19 @@
 
   <div class="container" style="margin-top:25px"><p class="fs-4" th:text="${'Showing '+numProfiles+' results for '+profName}">Showing results</p></div>
   
-  <div class="card bg-transparent border-0" th:each="prof, iterator:${names}" th:href="@{/}">
+  <div class="card bg-transparent border-0" th:each="prof, iterator:${profiles}" th:href="@{/}">
   	<div class="card-body bg-light rounded-0 shadow" style="width:80%;margin:auto;border-radius:30px">
   	<div class="row">
   		<div class="col text-white h3" th:text="${scores[iterator.index]}" style="background-color:#363062;padding:50px 0px;text-align:center;margin:0px 20px 0px 20px">
   		<h4>Score</h4>
   		</div>
     	<div class="col-10">
-    	<h5 th:text="${prof.profFirstName + ' ' + prof.profLastName}" class="card-title">Professor's name</h5>
-    	<p th:text="${depts[iterator.index].deptName}" class="card-text" style="margin:0px">Department</p>
-    	<h6 th:text="${insts[iterator.index].instName}" class="card-text">Institution</h6>
+    	<h5 th:text="${prof.getProf().profFirstName + ' ' + prof.getProf().profLastName}" class="card-title">Professor's name</h5>
+    	<p th:text="${prof.getDept().deptName}" class="card-text" style="margin:0px">Department</p>
+    	<h6 th:text="${prof.getDept().getInst().instName}" class="card-text">Institution</h6>
    		</div>
    	</div>
-   	<a href="#" class="stretched-link"></a>
+   	<a th:href="@{${prof.idProfDept}}" class="stretched-link"></a>
  	</div>
   </div>
 

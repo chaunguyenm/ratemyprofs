@@ -16,6 +16,11 @@ public class ProfDeptService {
     @Autowired
     ProfDeptRepository profDeptRepo;
     
+    @Transactional(readOnly=true)
+    public ProfDept findById(int idProfDept) {
+        return this.profDeptRepo.findById(Integer.valueOf(idProfDept)).get();
+    }
+    
     @Transactional(readOnly=true) 
     public List<ProfDept> listDeptByProf(Prof prof) {
         List<ProfDept> profDepts = this.profDeptRepo.findAll();
