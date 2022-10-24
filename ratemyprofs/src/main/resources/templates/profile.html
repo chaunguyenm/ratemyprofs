@@ -53,7 +53,9 @@
     		All Courses
   			</a>
   			<div class="dropdown-menu" th:each="course:${courses}">
-    			<a class="dropdown-item" th:text="${course.getCourseCode()}" th:href="@{${profDept.getIdProfDept()+'/'+course.getCourseCode()}}">Course</a>
+    			<a class="dropdown-item" th:text="${course.getCourseCode()}" 
+    			th:href="@{'/'+${profDept.getIdProfDept()}+'/'+${course.getIdCourse()}}">Course</a>
+    			<a class="dropdown-item" th:href="@{'/'+${profDept.getIdProfDept()}+'/other'}">Other</a>
   			</div>
 		</div>
 		
@@ -62,7 +64,7 @@
     			<div class="card" style="border-radius:0px">
       				<div class="card-body">
         				<h5 class="card-title">Overall Score</h5>
-        				<p class="card-text" th:text="${score}"></p>
+        				<p class="card-text" th:text="${#numbers.formatDecimal(score, 1, 'DEFAULT', 2, 'DEFAULT')}"></p>
       				</div>
     			</div>
   			</div>

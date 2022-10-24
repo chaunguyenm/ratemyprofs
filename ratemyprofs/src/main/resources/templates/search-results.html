@@ -47,7 +47,7 @@
   <div class="card bg-transparent border-0" th:each="prof, iterator:${profiles}" th:href="@{/}">
   	<div class="card-body bg-light rounded-0 shadow" style="width:80%;margin:auto;border-radius:30px">
   	<div class="row">
-  		<div class="col text-white h3" th:text="${scores[iterator.index]}" style="background-color:#363062;padding:50px 0px;text-align:center;margin:0px 20px 0px 20px">
+  		<div class="col text-white h3" th:text="${#numbers.formatDecimal(scores[iterator.index], 1, 'DEFAULT', 2, 'DEFAULT')}" style="background-color:#363062;padding:50px 0px;text-align:center;margin:0px 20px 0px 20px">
   		<h4>Score</h4>
   		</div>
     	<div class="col-10">

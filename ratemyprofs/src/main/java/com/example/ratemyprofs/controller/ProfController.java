@@ -2,8 +2,8 @@ package com.example.ratemyprofs.controller;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.example.ratemyprofs.jpa.Dept;
-import com.example.ratemyprofs.jpa.Inst;
 import com.example.ratemyprofs.jpa.Prof;
 import com.example.ratemyprofs.jpa.ProfDept;
+import com.example.ratemyprofs.jpa.Rating;
+import com.example.ratemyprofs.service.CourseService;
 import com.example.ratemyprofs.service.ProfDeptService;
 import com.example.ratemyprofs.service.ProfService;
 import com.example.ratemyprofs.service.RatingService;
@@ -32,6 +32,7 @@ public class ProfController {
     @Autowired ProfService profService;
     @Autowired ProfDeptService profDeptService;
     @Autowired RatingService ratingService;
+    @Autowired CourseService courseService;
     
     @GetMapping({"/", "/index"})
     public String init() {
@@ -45,11 +46,13 @@ public class ProfController {
         String profName = request.getParameter("profName");
         List<Prof> profs = this.profService.findByName(profName);
         
+        // get professors with matching name
         List<ProfDept> profiles = new ArrayList<ProfDept>();
         for (Prof prof:profs) {
             profiles.addAll(profDeptService.listDeptByProf(prof));
         }
         
+        // calculate professors' scores
         double[] scores = new double[profiles.size()];
         for (int i = 0; i < profiles.size(); i++) {
             scores[i] = this.ratingService.calculateScoreByProfDept(profiles.get(i));
@@ -68,7 +71,12 @@ public class ProfController {
         ProfDept profDept = this.profDeptService.findById(idProfDept);
         
         model.addAttribute("profDept", profDept);
-        model.addAttribute("ratings", this.ratingService.findRatingsByProfDept(profDept));
+        
+        // sort ratings from newest to oldest
+        List<Rating> ratings = this.ratingService.findRatingsByProfDept(profDept);
+        ratings.sort((r1, r2) -> r2.getCreated().compareTo(r1.getCreated()));
+        model.addAttribute("ratings", ratings);
+        
         model.addAttribute("score", this.ratingService.calculateScoreByProfDept(profDept));
         model.addAttribute("difficulty", this.ratingService.calculateDifficultyByProfDept(profDept));
         model.addAttribute("retake", this.ratingService.calculateWillRetakeByProfDept(profDept));
@@ -76,21 +84,78 @@ public class ProfController {
         return "profile";
     }
     
-    @GetMapping("/{idProfDept}/{courseCode}")
+    @GetMapping("/{idProfDept}/{idCourse}")
     public String showProfileWithCourse(@PathVariable("idProfDept") int idProfDept,
-                                        @PathVariable("courseCode") String courseCode,
+                                        @PathVariable("idCourse") String idCourse,
                                         Model model) {
         ProfDept profDept = this.profDeptService.findById(idProfDept);
         
         model.addAttribute("profDept", profDept);
-        model.addAttribute("ratings", this.ratingService.findRatingsByProfDept(profDept, courseCode));
-        model.addAttribute("score", this.ratingService.calculateScoreByProfDept(profDept, courseCode));
-        model.addAttribute("difficulty", this.ratingService.calculateDifficultyByProfDept(profDept, courseCode));
-        model.addAttribute("retake", this.ratingService.calculateWillRetakeByProfDept(profDept, courseCode));
+        
+        // sort ratings from newest to oldest
+        List<Rating> ratings = this.ratingService.findRatingsByProfDept(profDept, idCourse);
+        ratings.sort((r1, r2) -> r2.getCreated().compareTo(r1.getCreated()));
+        model.addAttribute("ratings", ratings);
+        
+        model.addAttribute("score", this.ratingService.calculateScoreByProfDept(profDept, idCourse));
+        model.addAttribute("difficulty", this.ratingService.calculateDifficultyByProfDept(profDept, idCourse));
+        model.addAttribute("retake", this.ratingService.calculateWillRetakeByProfDept(profDept, idCourse));
         model.addAttribute("courses", this.ratingService.listCourseByProfDept(profDept));
         return "profile";
     }
     
-
+    @GetMapping("/{idProfDept}/rate")
+    public String showRate(@PathVariable("idProfDept") int idProfDept, Model model) {
+        ProfDept profDept = this.profDeptService.findById(idProfDept);
+        
+        model.addAttribute("profDept", profDept);
+        return "rate";
+    }
+    
+    @PostMapping("/{idProfDept}/rate")
+    public String rate(@PathVariable("idProfDept") int idProfDept, HttpServletRequest request, Model model) {
+        ProfDept profDept = this.profDeptService.findById(idProfDept);
+        
+        // create new Rating
+        Rating rating = new Rating();
+        rating.setOverallScore(Integer.parseInt(request.getParameter("overallScore")));
+        rating.setDifficultyLevel(Integer.parseInt(request.getParameter("difficultyLevel")));
+        rating.setWillRetake(request.getParameter("willRetake").equals("yes")?true:false);
+        if (request.getParameter("forCredit") != null) 
+            rating.setForCredit(request.getParameter("forCredit").equals("yes")?true:false);
+        if (request.getParameter("requireTextbook") != null) 
+            rating.setRequireTextbook(request.getParameter("requireTextbook").equals("yes")?true:false);
+        if (request.getParameter("requireAttendance") != null) 
+            rating.setRequireAttendance(request.getParameter("requireAttendance").equals("yes")?true:false);
+        if (request.getParameter("receivedGrade") != null) 
+            rating.setReceivedGrade(request.getParameter("receivedGrade"));
+        rating.setReview(request.getParameter("review"));
+        rating.setProf(profDept.getProf());
+        if (request.getParameter("course") != null)
+            rating.setCourse(this.courseService.findCourseById(Integer.parseInt(request.getParameter("course"))));
+        rating.setDept(profDept.getDept());
+        rating.setCourseCode(request.getParameter("courseCode"));
+        rating.setCreated(new Date());
+        rating.setModified(rating.getCreated());
+        rating.setRatingStatus("A");
+        rating.setUserIdUser(Integer.parseInt(request.getParameter("idUser")));
+        
+        // write new rating to database
+        this.ratingService.createRating(rating);
+        
+        
+        model.addAttribute("profDept", profDept);
+        
+        // sort ratings from newest to oldest
+        List<Rating> ratings = this.ratingService.findRatingsByProfDept(profDept);
+        ratings.sort((r1, r2) -> r2.getCreated().compareTo(r1.getCreated()));
+        model.addAttribute("ratings", ratings);
+        
+        model.addAttribute("score", this.ratingService.calculateScoreByProfDept(profDept));
+        model.addAttribute("difficulty", this.ratingService.calculateDifficultyByProfDept(profDept));
+        model.addAttribute("retake", this.ratingService.calculateWillRetakeByProfDept(profDept));
+        model.addAttribute("courses", this.ratingService.listCourseByProfDept(profDept));
+        return "profile";
+    }
 }
 

@@ -175,12 +175,12 @@ public class Rating implements Serializable {
 		this.review = review;
 	}
 
-	public int getUserIdUser1() {
+	public int getUserIdUser() {
 		return this.userIdUser;
 	}
 
-	public void setUserIdUser1(int userIdUser1) {
-		this.userIdUser = userIdUser1;
+	public void setUserIdUser(int userIdUser) {
+		this.userIdUser = userIdUser;
 	}
 
 	public Boolean getWillRetake() {

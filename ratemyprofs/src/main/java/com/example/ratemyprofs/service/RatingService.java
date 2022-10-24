@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.ratemyprofs.jpa.Course;
@@ -29,11 +30,17 @@ public class RatingService {
     }
     
     @Transactional(readOnly=true)
-    public List<Rating> findRatingsByProfDept(ProfDept profDept, String courseCode) {
+    public List<Rating> findRatingsByProfDept(ProfDept profDept, String idCourse) {
         List<Rating> ratings = this.ratingRepo.findAll();
-        ratings.removeIf(r -> r.getDept().getIdDept()!=profDept.getDept().getIdDept() 
-                || r.getProf().getIdProf()!=profDept.getProf().getIdProf()
-                || !r.getCourseCode().equals(courseCode));
+        ratings.removeIf(r -> r.getDept().getIdDept()!= profDept.getDept().getIdDept() 
+                || r.getProf().getIdProf()!=profDept.getProf().getIdProf());
+        
+        // idCourse == #, then filter ratings with no registered course
+        if (idCourse.equals("other")) ratings.removeIf(r -> r.getCourse() != null || r.getCourseCode() == null);
+        
+        // idCourse is specified, then filter by course.idCourse
+        else ratings.removeIf(r -> r.getCourse() == null || r.getCourse().getIdCourse() != Integer.parseInt(idCourse));
+        
         return ratings;
     }
     
@@ -48,8 +55,8 @@ public class RatingService {
     }
     
     @Transactional(readOnly=true)
-    public double calculateScoreByProfDept(ProfDept profDept, String courseCode) {
-        List<Rating> ratings = this.findRatingsByProfDept(profDept, courseCode);
+    public double calculateScoreByProfDept(ProfDept profDept, String idCourse) {
+        List<Rating> ratings = this.findRatingsByProfDept(profDept, idCourse);
         double total = 0;
         for (Rating rating:ratings) {
             total += rating.getOverallScore();
@@ -68,8 +75,8 @@ public class RatingService {
     }
     
     @Transactional(readOnly=true)
-    public double calculateDifficultyByProfDept(ProfDept profDept, String courseCode) {
-        List<Rating> ratings = this.findRatingsByProfDept(profDept, courseCode);
+    public double calculateDifficultyByProfDept(ProfDept profDept, String idCourse) {
+        List<Rating> ratings = this.findRatingsByProfDept(profDept, idCourse);
         double total = 0;
         for (Rating rating:ratings) {
             total += rating.getDifficultyLevel();
@@ -80,6 +87,7 @@ public class RatingService {
     @Transactional(readOnly=true)
     public double calculateWillRetakeByProfDept(ProfDept profDept) {
         List<Rating> ratings = this.findRatingsByProfDept(profDept);
+        ratings.removeIf(r -> r.getWillRetake()==null);
         int count = 0;
         for (Rating rating:ratings) {
             if (rating.getWillRetake() != null && rating.getWillRetake()) count++;
@@ -88,8 +96,9 @@ public class RatingService {
     }
     
     @Transactional(readOnly=true)
-    public double calculateWillRetakeByProfDept(ProfDept profDept, String courseCode) {
-        List<Rating> ratings = this.findRatingsByProfDept(profDept, courseCode);
+    public double calculateWillRetakeByProfDept(ProfDept profDept, String idCourse) {
+        List<Rating> ratings = this.findRatingsByProfDept(profDept, idCourse);
+        ratings.removeIf(r -> r.getWillRetake()==null);
         int count = 0;
         for (Rating rating:ratings) {
             if (rating.getWillRetake() != null && rating.getWillRetake()) count++;
@@ -101,8 +110,22 @@ public class RatingService {
     public List<Course> listCourseByProfDept(ProfDept profDept) {
         Map<String, Course> courses = new HashMap<String, Course>();
         List<Rating> ratings = this.findRatingsByProfDept(profDept);
-        for (Rating rating:ratings) courses.put(rating.getCourseCode(), rating.getCourse());
+        for (Rating rating:ratings) {
+            if (rating.getCourse() != null) courses.put(rating.getCourse().getCourseCode(), rating.getCourse());
+        }
         return new ArrayList<Course>(courses.values());
+    }
+    
+    private void validateRating(Rating rating) {
+        
+    }
+    
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void createRating(Rating rating) {
+        this.validateRating(rating);
+        
+        rating.setRatingStatus("A");
+        this.ratingRepo.save(rating);
     }
 
 }
