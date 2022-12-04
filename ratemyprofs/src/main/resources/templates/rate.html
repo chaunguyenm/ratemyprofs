@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+
+<!-- <a href="https://www.freepik.com/free-vector/flat-smiling-college-university-students-with-books_23624472.htm#query=illustration%20school&position=0&from_view=search&track=sph">Image by redgreystock</a> on Freepik -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Profile page for RateMyProfessors">
+    <meta name="keywords" content="RateMyProfessors, profile">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- <link rel="stylesheet" href="main.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://kit.fontawesome.com/4967b357bc.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <title th:text="'Rate: ' + ${profDept.prof.profFirstName} + ' ' + ${profDept.prof.profLastName} + ' at ' + ${profDept.dept.getInst().getInstName()}">Professor at Institution</title>
+
+	<script>
+	function displayScore(score) {
+		var html;
+		if (score == 1) {
+			html = 'Kinh khủng <i class="fa-solid fa-face-tired"></i>';
+		}
+		else if (score == 2) {
+			html = 'Tệ <i class="fa-solid fa-face-frown"></i>';
+		}
+		else if (score == 3) {
+			html = 'Bình thường <span class="fa-solid fa-face-meh"></span>';
+		} 
+		else if (score == 4) {
+			html = 'Ổn <i class="fa-solid fa-face-smile-beam"></i>';
+		}
+		else {
+			html = 'Tuyệt đỉnh <i class="fa-solid fa-face-laugh-squint"></i>';
+		}
+		document.getElementById("overallScoreNum").innerHTML = html;
+	}
+	</script>
+	
+	<script>
+	function displayDifficulty(difficulty) {
+		var html;
+		if (difficulty == 1) {
+			html = 'Game là dễ <i class="fa-solid fa-hand-peace"></i>';
+		}
+		else if (difficulty == 2) {
+			html = 'Đơn giản <i class="fa-solid fa-face-smile"></i>';
+		}
+		else if (difficulty == 3) {
+			html = 'Học được <i class="fa-solid fa-face-meh"></i>';
+		}
+		else if (difficulty == 4) {
+			html = 'Khó <i class="fa-solid fa-face-grimace"></i>';
+		}
+		else {
+			html = 'Ngất ngây <i class="fa-solid fa-skull"></i>';
+		}
+		document.getElementById("difficultyLevelNum").innerHTML = html;
+	}
+	</script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+		<div class="container-fluid">
+	        <a class="navbar-brand" th:href="@{/}">Trang chủ</a>
+	        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      		<span class="navbar-toggler-icon"></span>
+      		</button>
+	        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+	            <form class="d-flex flex-fill justify-content-center" role="search" th:action="@{/search}" method="post">
+                    <div class="form-floating form-check-inline">
+                        <input type="text" class="form-control me-2" id="name" th:name="profName" placeholder="Nhập tên giảng viên">
+                        <label for="name" class="form-label">Giảng viên</label>                    
+                    </div>
+                    <div class="form-floating form-check-inline">
+                        <input type="text" class="form-control me-2" id="inst" th:name="profInst" placeholder="Nhập tên trường">
+                    	<label for="inst" class="form-label">Trường</label>                    
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">
+                        <span class="fa fa-search" title="Tìm kiếm"></span>
+                    </button>
+	            </form>
+	        	<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+	        		<li><a class="nav-item btn btn-outline-primary" th:href="@{/login}">Đăng nhập</a></li>
+	        		<li><a class="nav-item btn btn-primary" th:href="@{/signup}">Đăng kí</a></li>
+	        	</ul>	
+	        </div>	
+		</div>
+    </nav>
+
+    <main class="container">
+        <div>
+            <h1 th:text="'Đánh giá: ' + ${profDept.prof.profFirstName} + ' ' + ${profDept.prof.profLastName} + ' tại ' + ${profDept.dept.getInst().getInstName()}">Professor at Institution</h1>
+		</div>
+        <div>
+            <form th:action="@{'/'+${profDept.getIdProfDept()}+'/rate'}" method="post">
+            	<div class="row">
+	                <div class="col-4">
+	                    <label class="form-label" for="course" >Môn học</label>
+	                    <input class="form-control" type="text" list="course-list" th:name="course" required>
+	                    <datalist id="course-list" th:each="course:${courses}">
+	                        <option th:value="${course.getIdCourse()}" th:text="${course.getCourseCode()}"></option>
+	                    </datalist>
+	                </div>
+	                <div class="col-4">
+	                    <label class="form-label" for="overallScore">Đánh giá chung</label>
+	                    <input class="form-range" type="range" min="1" max="5" id="overallScore" th:name="overallScore" oninput="displayScore(this.value)" required>
+	                    <output id="overallScoreNum"></output>              
+	                </div>
+	                <div class="col-4">
+	                    <label class="form-label" for="difficultyLevel">Độ khó</label>
+	                    <input class="form-range" type="range" min="1" max="5" id="difficultyLevel" th:name="difficultyLevel" oninput="displayDifficulty(this.value)" required>  
+	                    <output id="difficultyLevelNum"></output>                    
+	                </div>  
+	                <div class="col-3">
+	                    <div>Tôi sẽ tiếp tục học với giảng viên này.</div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="willRetakeYes" name="willRetake" th:name="willRetake" th:value="yes" required>
+	                        <label class="form-check-label" for="willRetakeYes">Đồng ý</label>
+	                    </div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="willRetakeNo" name="willRetake" th:name="willRetake" th:value="no" required>
+	                        <label class="form-check-label" for="willRetakeNo">Không đồng ý</label>
+	                    </div>
+	                </div>
+	                <div class="col-3">
+	                    <div>Môn học này lấy tín chỉ.</div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="forCreditYes" name="forCredit" th:name="forCredit" th:value="true">
+	                        <label class="form-check-label" for="forCreditYes">Đồng ý</label>
+	                    </div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="forCreditNo" name="forCredit" th:name="forCredit" th:value="false">
+	                        <label class="form-check-label" for="forCreditNo">Không đồng ý</label>
+	                    </div>
+	                </div>
+	                <div class="col-3">
+	                    <div>Môn học này yêu cầu sách giáo khoa.</div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="requireTextbookYes" name="requireTextbook" th:name="requireTextbook" th:value="true">
+	                        <label class="form-check-label" for="forCreditYes">Đồng ý</label>
+	                    </div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="requireTextbookNo" name="requireTextbook" th:name="requireTextbook" th:value="false">
+	                        <label class="form-check-label" for="forCreditNo">Không đồng ý</label>
+	                    </div>
+	                </div>
+	                <div class="col-3">
+	                    <div>Môn học này bắt buộc điểm danh.</div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="requireAttendanceYes" name="requireAttendance" th:name="requireAttendance" th:value="true">
+	                        <label class="form-check-label" for="forCreditYes">Đồng ý</label>
+	                    </div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="radio" id="requireAttendanceNo" name="requireAttendance" th:name="requireAttendance" th:value="false">
+	                        <label class="form-check-label" for="forCreditNo">Không đồng ý</label>
+	                    </div>
+		            </div>
+		            <div class="col-auto">
+		                <label class="form-label" for="receivedGrade">Điểm tổng kết</label>
+		                <input class="form-control" type="text" id="receivedGrade" th:name="receivedGrade">
+		            </div>
+		            <div class="col">
+		   	            <label class="form-label" for="review">Hãy nhận xét cụ thể về giảng viên này.</label>
+		                <textarea class="form-control" rows=5 th:name="review" required></textarea>
+		            </div>	                         	
+            	</div>
+           		<div class="text-center">
+                    <button class="btn btn-primary" type="submit">Đăng tải</button>
+               	</div> 
+            </form>
+        </div>
+    </main>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -35,6 +35,9 @@ public class RatingService {
         ratings.removeIf(r -> r.getDept().getIdDept()!= profDept.getDept().getIdDept() 
                 || r.getProf().getIdProf()!=profDept.getProf().getIdProf());
         
+        // idCourse == "", then no filter
+        if (idCourse.equals("")) return findRatingsByProfDept(profDept);
+        
         // idCourse == #, then filter ratings with no registered course
         if (idCourse.equals("other")) ratings.removeIf(r -> r.getCourse() != null || r.getCourseCode() == null);
         

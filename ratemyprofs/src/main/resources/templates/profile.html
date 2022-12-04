@@ -1,145 +1,114 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Profile page for RateMyProfessors">
+    <meta name="keywords" content="RateMyProfessors, profile">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- <link rel="stylesheet" href="main.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <title th:text="${profDept.prof.profFirstName} + ' ' + ${profDept.prof.profLastName} + ' tại ' + ${profDept.dept.getInst().getInstName()}">Giảng viên tại trường</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+		<div class="container-fluid">
+	        <a class="navbar-brand" th:href="@{/}">Trang chủ</a>
+	        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      		<span class="navbar-toggler-icon"></span>
+      		</button>
+	        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+	            <form class="d-flex flex-fill justify-content-center" role="search" th:action="@{/search}" method="post">
+                    <div class="form-floating form-check-inline">
+                        <input type="text" class="form-control me-2" id="name" th:name="profName" placeholder="Nhập tên giảng viên">
+                        <label for="name" class="form-label">Giảng viên</label>                    
+                    </div>
+                    <div class="form-floating form-check-inline">
+                        <input type="text" class="form-control me-2" id="inst" th:name="profInst" placeholder="Nhập tên trường">
+                    	<label for="inst" class="form-label">Trường</label>                    
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">
+                        <span class="fa fa-search" title="Tìm kiếm"></span>
+                    </button>
+	            </form>
+	        	<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+	        		<li><a class="nav-item btn btn-outline-primary" th:href="@{/login}">Đăng nhập</a></li>
+	        		<li><a class="nav-item btn btn-primary" th:href="@{/signup}">Đăng kí</a></li>
+	        	</ul>	
+	        </div>	
+		</div>
+    </nav>
+    <main class="container">
+        <div>
+            <div>
+                <h1 th:text="${profDept.prof.profFirstName} + ' ' + ${profDept.prof.profLastName}">Giảng viên</h1>
+                <h2 th:text="${profDept.getDept().getDeptName()}">Bộ môn</h2>
+                <h2 th:text="${profDept.getDept().getInst().getInstName()}">Trường</h2>
+            </div>
+            <div class="btn-group">
+                <a class="btn btn-secondary" th:href="@{'/profile?id='+${profDept.getIdProfDept()}}">Tất cả môn học</a>
+                <a class="btn btn-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    				<span class="visually-hidden">Thêm môn</span>
+  				</a>
+                <ul class="dropdown-menu" th:each="course:${courses}">
+                    <li><a class="dropdown-item" th:text="${course.getCourseCode()}" th:href="@{'/profile?id='+${profDept.getIdProfDept()}+'&course='+${course.getIdCourse()}}">Môn</a></li>
+                    <li><a class="dropdown-item" th:href="@{'/profile?id='+${profDept.getIdProfDept()}+'&course=other'}">Khác</a></li>
+                </ul>
+            </div>
+            <a th:href="@{'/rate?id='+${profDept.getIdProfDept()}}">Chấm điểm giảng viên</a>
+        </div>
+                
+        <div class="card" th:each="rating:${ratings}">
+        	<div class="card-body">
+        		<div class="row">
+        			<div class="col-auto text-center">
+        				<strong class="row-fluid">Đánh giá</strong>
+        				<h3 th:if="${rating.getOverallScore() &lt; 2}" class="row-fluid text-bg-danger" th:text="${rating.getOverallScore()}">Đánh giá</h3>
+						<h3 th:if="${rating.getOverallScore() &lt;= 4 and rating.getOverallScore() &gt;= 2}" class="row-fluid text-bg-warning" th:text="${rating.getOverallScore()}">Đánh giá</h3>
+						<h3 th:if="${rating.getOverallScore() &gt; 4}" class="row-fluid text-bg-success" th:text="${rating.getOverallScore()}">Đánh giá</h3>
+						
+						<strong class="row-fluid">Độ khó</strong>
+						<h3 th:if="${rating.getDifficultyLevel() &gt; 4}" class="row-fluid text-bg-danger" th:text="${rating.getDifficultyLevel()}">Độ khó</h3>
+						<h3 th:if="${rating.getDifficultyLevel() &gt;= 2 and rating.getDifficultyLevel() &lt;= 4}" class="row-fluid text-bg-warning" th:text="${rating.getDifficultyLevel()}">Độ khó</h3>
+						<h3 th:if="${rating.getDifficultyLevel() &lt; 2}" class="row-fluid text-bg-success" th:text="${rating.getDifficultyLevel()}">Độ khó</h3>
+        			</div>
+        			<div class="col">
+	        			<div class="row">
+						<div class="col-auto card-text border-end" th:if="${rating.getWillRetake()}!=null" th:switch="${rating.getWillRetake()}">
+		      				<div th:case="false">Nên học: Không</div>
+		    				<div th:case="true">Nên học: Có</div>
+		    			</div>
+		    			<div class="col-auto card-text border-end" th:if="${rating.getForCredit()}!=null" th:switch="${rating.getForCredit()}">
+		   					<div th:case="false">Lấy tín chỉ: Không</div>
+		    				<div th:case="true">Lấy tín chỉ: Có</div>
+		    			</div>
+		    			<div class="col-auto card-text border-end" th:if="${rating.getRequireTextbook()}!=null" th:switch="${rating.getRequireTextbook()}">
+		      				<div th:case="false">Sách giáo khoa: Không</div>
+		    				<div th:case="true">Sách giáo khoa: Có</div>
+		    			</div>
+		    			<div class="col-auto card-text border-end" th:if="${rating.getRequireAttendance()}!=null" th:switch="${rating.getRequireAttendance()}">
+		      				<div th:case="false">Điểm danh: Không</div>
+		    				<div th:case="true">Điểm danh: Có</div>
+		    			</div>
+		    			<div class="col-auto card-text" th:if="${rating.getReceivedGrade()}!=null" th:text="${'Điểm tổng kết: '+rating.getReceivedGrade()}"></div>
+					</div>
+		  			<p class="card-text" th:text="${rating.getReview()}"></p>  
+        		</div>
+        	</div>
+	  		<div class="card-text text-end">
+	  			<small class="text-muted" th:text="'Đăng tải '+${#dates.format(rating.getCreated(), 'dd-MM-yyyy')}">Đăng tải</small>
+	  			<small class="text-muted" th:text="'Cập nhật '+${#dates.format(rating.getModified(), 'dd-MM-yyyy')}">Cập nhật</small>
+	 		</div>
+        </div>
+        </div>
+    </main>
     
-    <title th:text="${profDept.prof.profFirstName+' '+profDept.prof.profLastName+' at '+profDept.dept.getInst().getInstName()}">Hello, world!</title>
-  </head>
-  <body style="background-color:#E9D5DA">
-  
-  <nav class="navbar navbar-expand-lg bg-light">
-  <div class="container-fluid justify-content-center">
-    <a class="navbar-brand" th:href="@{/}">RateMyProfessors</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-   <div class="container" style="width:75%">
-	<form th:action="@{/search}" method="post" role="search">
-  	<div class="d-flex flex-fill flex-row">
-  		<div class="flex-grow-1" style="margin:0px 5px">
-    			<input type="text" th:name="profName" class="form-control bg-light" style="border-radius:30px;border-color:#363062" id="profName" placeholder="Name">
-  		</div>
-  		<div class="flex-grow-1" style="margin:0px 5px">
-    			<input type="text" class="form-control bg-light" style="border-radius:30px;border-color:#363062" id="profInst" placeholder="Institution">
-  		</div>
-  		<div class="flex-shrink-1" style="margin:0px 5px">
-  			<button type="submit" class="btn border-0" style="background-color:#363062;border-radius:30px">
-  			<span class="fa fa-search" style="color:#f8f9fa"></span>
-  			</button>
-  		</div>
-  	</div>
-  	</form>
-  	</div>
-    	<a th:href="@{/}" class="btn btn-sm btn-outline me-2" style="border-color:#363062" type="button">Log in</a>
-    	<a th:href="@{/}" class="btn btn-sm btn-outline text-white" style="background-color:#363062" type="button">Sign up</a>
-  	</div>
-  </nav>
-  
-  <div class="d-flex">
-  	<div class="jumbotron p-2 flex-fill text-white shadow" style="background-color:#827397; margin:50px 10px 10px 100px">
-  		<h1 class="display-3" th:text="${profDept.prof.profFirstName+' '+profDept.prof.profLastName}">Professor's Name</h1>
-  		<p th:text="${profDept.getDept().getDeptName()}">Department</p>
-  		<p th:text="${profDept.getDept().getInst().getInstName()}">Institution</p>
-  	</div>
-  	<div class="jumbotron p-2 flex-fill text-white shadow" style="background-color:#827397; margin:50px 100px 10px 10px">
-  		<div class="dropdown">
-  			<a class="btn dropdown-toggle text-white" th:href="@{${profDept.getIdProfDept()}}" role="button" data-toggle="dropdown" aria-expanded="false" style="background-color:#363062">
-    		All Courses
-  			</a>
-  			<div class="dropdown-menu" th:each="course:${courses}">
-    			<a class="dropdown-item" th:text="${course.getCourseCode()}" 
-    			th:href="@{'/'+${profDept.getIdProfDept()}+'/'+${course.getIdCourse()}}">Course</a>
-    			<a class="dropdown-item" th:href="@{'/'+${profDept.getIdProfDept()}+'/other'}">Other</a>
-  			</div>
-		</div>
-		
-		<div class="row text-black" style="margin:10px 0px 0px 0px">
-  			<div class="col-sm-4">
-    			<div class="card" style="border-radius:0px">
-      				<div class="card-body">
-        				<h5 class="card-title">Overall Score</h5>
-        				<p class="card-text" th:text="${#numbers.formatDecimal(score, 1, 'DEFAULT', 2, 'DEFAULT')}"></p>
-      				</div>
-    			</div>
-  			</div>
-  			<div class="col-sm-4">
-    			<div class="card" style="border-radius:0px">
-      				<div class="card-body">
-        				<h5 class="card-title">Difficulty</h5>
-       					<p class="card-text" th:text="${difficulty}"></p>
-      				</div>
-    			</div>
-  			</div>
-  			<div class="col-sm-4">
-    			<div class="card" style="border-radius:0px">
-      				<div class="card-body">
-        				<h5 class="card-title">Would take again</h5>
-       					<p class="card-text" th:if="${retake}!=-1" th:text="${retake+'%'}"></p>
-       					<p class="card-text" th:if="${retake}==-1">N/A</p>
-      				</div>
-    			</div>
-  			</div>
-		</div>
-		
-  	</div>
-  </div>
-  
-	<div class="jumbotron bg-light" th:each="rating:${ratings}" style="margin:50px 100px 10px 100px">
-  		<div class="row">
-    		<div class="col-2">
-    			<div class="row">
-    				<div class="col-12" th:text="${'Overall: '+rating.getOverallScore()}">Overall Score</div>
-    			</div>
-    			<div class="row">
-    				<div class="col-12" th:text="${'Difficulty: '+rating.getDifficultyLevel()}">Difficulty Level</div>
-    			</div>
-    		</div>
-    		<div class="col-10">
-    		<div class="row">
-    			<div class="col align-self-end" th:text="${#dates.format(rating.getCreated(), 'dd-MM-yyyy')}"></div>
-    		</div>
-    		<div class="row">
-    			<div class="col" th:if="${rating.getWillRetake()}!=null" th:switch="${rating.getWillRetake()}">
-      				<p th:case="0">Would Take Again: No</p>
-    				<p th:case="1">Would Take Again: Yes</p>
-    			</div>
-    			<div class="col" th:if="${rating.getForCredit()}!=null" th:switch="${rating.getForCredit()}">
-      				<p th:case="0">For Credit: No</p>
-    				<p th:case="1">For Credit: Yes</p>
-    			</div>
-    			<div class="col" th:if="${rating.getRequireTextbook()}!=null" th:switch="${rating.getRequireTextbook()}">
-      				<p th:case="0">Textbook: No</p>
-    				<p th:case="1">Textbook: Yes</p>
-    			</div>
-    			<div class="col" th:if="${rating.getRequireAttendance()}!=null" th:switch="${rating.getRequireAttendance()}">
-      				<p th:case="0">Attendance: Not Mandatory</p>
-    				<p th:case="1">Attendance: Mandatory</p>
-    			</div>
-    			<div class="col" th:if="${rating.getReceivedGrade()}!=null" th:text="${'Received Grade: '+rating.getReceivedGrade()}">
-    			</div>
-  			</div>
-  			<p th:text="${rating.getReview()}"></p>
-    		</div>
-  		</div>
-	</div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+</body>
 
-    <!-- Optional JavaScript; choose one of the two! -->
-
-    <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
-
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <!--
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
-    -->
-  </body>
 </html>

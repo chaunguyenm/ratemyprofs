@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.ratemyprofs.jpa.User;
 import com.example.ratemyprofs.repository.UserRepository;
 
+@Service
 public class UserService {
     
     @Autowired
@@ -50,7 +52,7 @@ public class UserService {
     }
     
     @Transactional(readOnly=true)
-    private User findUserByUsername(String username) {
+    public User findUserByUsername(String username) {
         List<User> users = this.listUsers();
         users.removeIf(u -> !u.getUserStatus().equals("A"));
         users.removeIf(u -> !u.getEmail().equals(username));

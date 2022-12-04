@@ -55,8 +55,8 @@ public class Rating implements Serializable {
 	@Column(nullable=false, length=350)
 	private String review;
 
-	@Column(name="USER_ID_USER", nullable=false)
-	private int userIdUser;
+	@Column(name="USER_ID_USER", nullable=true)
+	private Integer userIdUser;
 
 	@Column(name="WILL_RETAKE", nullable=false)
 	private Boolean willRetake;
@@ -179,7 +179,7 @@ public class Rating implements Serializable {
 		return this.userIdUser;
 	}
 
-	public void setUserIdUser(int userIdUser) {
+	public void setUserIdUser(Integer userIdUser) {
 		this.userIdUser = userIdUser;
 	}
 
