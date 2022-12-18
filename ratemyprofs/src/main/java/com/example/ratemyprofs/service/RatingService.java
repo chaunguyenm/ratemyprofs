@@ -95,7 +95,7 @@ public class RatingService {
         for (Rating rating:ratings) {
             if (rating.getWillRetake() != null && rating.getWillRetake()) count++;
         }
-        return count==0?-1:count/ratings.size()*100;
+        return ratings.size()==0?-1:(double)count/(double)ratings.size()*100;
     }
     
     @Transactional(readOnly=true)
@@ -106,7 +106,7 @@ public class RatingService {
         for (Rating rating:ratings) {
             if (rating.getWillRetake() != null && rating.getWillRetake()) count++;
         }
-        return count==0?-1:count/ratings.size()*100;
+        return ratings.size()==0?-1:(double)count/(double)ratings.size()*100;
     }
     
     @Transactional(readOnly=true)

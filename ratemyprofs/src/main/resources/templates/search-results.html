@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<html lang="en" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 
 <head>
     <meta charset="UTF-8">
@@ -11,59 +11,70 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
-    <title th:text="'Kết quả tìm kiếm cho' + ${profName}">Kết quả tìm kiếm</title>
+    <title data-th-text="#{label.search-results.title} + ' ' + ${profName}">Search results</title>
+
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-light">
+    <nav class="navbar navbar-expand-lg bg-light shadow">
 		<div class="container-fluid">
-	        <a class="navbar-brand" th:href="@{/}">Trang chủ</a>
+	        <a class="navbar-brand" th:href="@{/}"><img src="/img/lo-2.png" alt="Logo" style="object-fit:contain;width:60px"></a>
 	        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       		<span class="navbar-toggler-icon"></span>
       		</button>
 	        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-	            <form class="d-flex flex-fill justify-content-center" role="search" th:action="@{/search}" method="post">
-                    <div class="form-floating form-check-inline">
-                        <input type="text" class="form-control me-2" id="name" th:name="profName" placeholder="Nhập tên giảng viên">
-                        <label for="name" class="form-label">Giảng viên</label>                    
+	            <form class="d-flex flex-fill" role="search" th:action="@{/search}" method="post">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="name" th:name="profName" data-th-placeholder="#{label.search-results.enterProf}">
+                        <input type="text" class="form-control" id="inst" th:name="profInst" data-th-placeholder="#{label.search-results.enterInst}">
+                        <button type="submit" class="btn btn-outline-warning">
+                        	<span class="fa fa-search" title="Tìm kiếm"></span>
+                    	</button>
                     </div>
-                    <div class="form-floating form-check-inline">
-                        <input type="text" class="form-control me-2" id="inst" th:name="profInst" placeholder="Nhập tên trường">
-                    	<label for="inst" class="form-label">Trường</label>                    
-                    </div>
-                    <button type="submit" class="btn btn-outline-primary">
-                        <span class="fa fa-search" title="Tìm kiếm"></span>
-                    </button>
 	            </form>
 	        	<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-	        		<li><a class="nav-item btn btn-outline-primary" th:href="@{/login}">Đăng nhập</a></li>
-	        		<li><a class="nav-item btn btn-primary" th:href="@{/signup}">Đăng kí</a></li>
+	        		<li sec:authorize="!isAuthenticated()"><a class="nav-item btn btn-outline-warning" th:href="@{/login}" data-th-text="#{label.search-results.login}">ĐLog in</a></li>
+	        		<li sec:authorize="!isAuthenticated()"><a class="nav-item btn btn-warning" th:href="@{/signup}" data-th-text="#{label.search-results.signup}">Sign up</a></li>
+	        		<li sec:authorize="isAuthenticated()"><a class="nav-item btn btn-outline-warning" th:href="@{/logout}" data-th-text="#{label.search-results.logout}">Log out</a>
 	        	</ul>	
 	        </div>	
 		</div>
     </nav>
     <main class="container">
-        <div th:if="${numProfiles} == 0">
-            <p>Có vẻ như bọn mình không có giảng viên bạn tìm trong cơ sở dữ liệu. Liên hệ bọn mình để thêm giảng viên nhé.</p>
-        </div>
-        <div th:if="${numProfiles} > 0">
-            <p th:text="'Hiển thị ' + ${numProfiles} + ' kết quả cho ' + ${profName}">Hiển thị kết quả</p>
-        </div>
+    	<div class="col">
+    	<div class="row" style="padding-top:30px">
+    		<div th:if="${numProfiles} == 0">
+	            <p class="text-muted" data-th-text="#{label.search-results.notFound}">It seems that we currently do not have the professor you are looking for in the database. Please contact us for your request.</p>
+	        </div>
+	        <div th:if="${numProfiles} > 0">
+	            <p class="text-muted" data-th-text="#{label.search-results.show}+' ' + ${numProfiles} + ' ' + #{label.search-results.results} + ' ' + ${profName}">Showing results</p>
+	        </div>
+    	</div>
+        
         <div class="row">
-            <div class="card text-center col-4" style="width:30%" th:if="${numProfiles} > 0" th:each="prof, iterator:${profiles}">
+            <div class="card text-center col-4 shadow" style="width:30%;margin:10px;border:0px" th:if="${numProfiles} > 0" th:each="prof, iterator:${profiles}">
                 <div class="card-body">
-                    <h2 class="card-header text-bg-danger" th:text="${#numbers.formatDecimal(scores[iterator.index], 1, 'DEFAULT', 2, 'DEFAULT')}" th:if="${scores[iterator.index] &lt; 2}">Điểm</h2>
-                    <h2 class="card-header text-bg-warning" th:text="${#numbers.formatDecimal(scores[iterator.index], 1, 'DEFAULT', 2, 'DEFAULT')}" th:if="${scores[iterator.index] &lt;= 4 and scores[iterator.index] &gt;= 2}">Điểm</h2>
-                    <h2 class="card-header text-bg-success" th:text="${#numbers.formatDecimal(scores[iterator.index], 1, 'DEFAULT', 2, 'DEFAULT')}" th:if="${scores[iterator.index] &gt; 4}">Điểm</h2>                 
-                    <h1 class="card-title" th:text="${prof.getProf().profFirstName} + ' ' + ${prof.getProf().profLastName}">Tên</h1>
-                    <p class="card-subtitle" th:text="${prof.getDept().deptName}">Bộ môn</p>
-                    <p class="card-subtitle" th:text="${prof.getDept().getInst().instName}">Trường</p>
-                    <a class="btn btn-outline-primary" th:href="@{'/profile?id='+${prof.getIdProfDept()}}">Xem hồ sơ</a>
+                	<h2 class="card-header" th:text="${#numbers.formatDecimal(scores[iterator.index], 1, 'DEFAULT', 2, 'DEFAULT')}" th:onmouseout="'javascript:translateColor(this, ' + ${scores[iterator.index]} + ');'" onmouseover="clearColor(this)">Diem</h2>
+      		        <h1 class="card-title" th:text="${prof.getProf().profFirstName} + ' ' + ${prof.getProf().profLastName}">Name</h1>
+                    <p class="card-subtitle" th:text="${prof.getDept().deptName}">Department</p>
+                    <p class="card-subtitle" th:text="${prof.getDept().getInst().instName}">Institution</p>
+                    <a class="btn btn-outline-warning" th:href="@{'/profile?id='+${prof.getIdProfDept()}}" data-th-text="#{label.search-results.redirect}">Go to profile]</a>
                 </div>
             </div>
         </div> 
+        </div>
     </main>
     
+    <script>
+    function translateColor(element, score) {
+    	const green = Math.ceil(score/5*255);
+    	element.style.backgroundColor=`rgb(255,${green},0)`;
+    }
+
+    function clearColor(element) {
+    	element.style.backgroundColor = "";
+    }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
 </body>

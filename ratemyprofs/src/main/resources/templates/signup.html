@@ -9,28 +9,68 @@
 
     <!-- <link rel="stylesheet" href="main.css"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
-    <title>Rate My Professors - Sign up</title>
+    <title data-th-text="#{label.signup.title}">Rate My Professors | Sign up</title>
 </head>
 
 <body>
-    <main>
+    <main class="container text-center" style="width:30%">
+    	<div class="display-5" style="margin-bottom:30px;font-weight:600" data-th-text="#{label.signup.headline}">Sign Up</div>
+	    <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${error != null}">
+	  		<div th:text="${error}"></div>
+	  		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+	    		<span aria-hidden="true">&times;</span>
+	  		</button>
+		</div>
         <form th:action="@{/signup}" method="post">
-            <div>
-                <label for="username">Username</label>
-                <input type="text" id="username" th:name="username">
+        	<div class="row align-items-center" style="margin-bottom:10px">
+                <div class="col">
+                	<label class="col-form-label" for="firstName" data-th-text="#{label.signup.firstName}">First Name</label>
+                </div>
+                <div class="col-auto">
+                	<input class="form-control" type="text" id="firstName" th:name="firstName">
+                </div>
             </div>
-            <div>
-                <label for="password">Password</label>
-                <input type="text" id="password" th:name="password">
+        	<div class="row align-items-center" style="margin-bottom:10px">
+                <div class="col">
+                	<label for="lastName" data-th-text="#{label.signup.lastName}">Last Name</label>
+                </div>
+                <div class="col-auto">
+                	<input class="form-control" type="text" id="lastName" th:name="lastName">
+                </div>
             </div>
-            <div>
-                <button type="submit">
+        	<div class="row align-items-center" style="margin-bottom:10px">
+                <div class="col">
+                	<label for="email" data-th-text="#{label.signup.email}">Email</label>
+                </div>
+                <div class="col-auto">
+                	<input class="form-control" type="text" id="email" th:name="email" required>
+                </div>
+            </div>
+            <div class="row align-items-center" style="margin-bottom:10px">
+                <div class="col">
+                	<label for="username" data-th-text="#{label.signup.username}">Username</label>
+                </div>
+                <div class="col-auto">
+                	<input class="form-control" type="text" id="username" th:name="username" required>
+                </div>
+            </div>
+            <div class="row align-items-center" style="margin-bottom:10px">
+                <div class="col">
+                	<label for="password" data-th-text="#{label.signup.password}">Password</label>
+                </div>
+                <div class="col-auto">
+                	<input class="form-control" type="password" id="password" th:name="password" required>
+                </div>
+            </div>
+            <div style="margin-bottom:10px">
+                <button class="btn btn-warning" type="submit" data-th-text="#{label.signup.signup}">
                     Sign up
                 </button>
             </div>
             <div>
-                <a th:href="@{/login}">Already have an account?</a>
+                <a th:href="@{/login}" data-th-text="#{label.signup.redirect}">Already have an account?</a>
             </div>
         </form>
     </main>

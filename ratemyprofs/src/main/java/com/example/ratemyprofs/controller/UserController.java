@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.ratemyprofs.jpa.User;
 import com.example.ratemyprofs.service.UserService;
+import com.example.ratemyprofs.system.UserAlreadyExistsException;
 
 @Controller
 public class UserController {
@@ -23,36 +24,35 @@ public class UserController {
         return "signup";
     }
     
-    @GetMapping("/login")
-    public String showLogIn() {
-        return "login";
-    }
+//    @GetMapping("/login")
+//    public String showLogIn() {
+//        return "login";
+//    }
     
     @PostMapping("/signup")
     public String signUp(HttpServletRequest request, Model model) throws ParseException {
+        String firstName = request.getParameter("firstName");
+        String lastName = request.getParameter("lastName");
         String username = request.getParameter("username");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         
         User user = new User();
+        user.setUserFirstName(firstName);
+        user.setUserLastName(lastName);
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(password);
-        this.userService.createUser(user);
         
-        model.addAttribute("user", user);
-        return "signup";
-    }
-    
-    @PostMapping("/login")
-    public String logIn(HttpServletRequest request, Model model) throws ParseException {
-        String username = request.getParameter("username");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+        try {
+            this.userService.createUser(user);
+        } 
+        catch (UserAlreadyExistsException e) {
+            model.addAttribute("error", e.getMessage());
+            return "signup";
+        }
         
-        User user = this.userService.authenticateUser(email, username, password);
-        
-        model.addAttribute("user", user);
+        model.addAttribute("message", "Registration successful! Please log in.");
         return "login";
     }
 

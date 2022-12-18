@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.ratemyprofs.jpa.User;
 import com.example.ratemyprofs.repository.UserRepository;
+import com.example.ratemyprofs.system.UserAlreadyExistsException;
 
 @Service
 public class UserService {
@@ -23,20 +24,11 @@ public class UserService {
     }
     
     @Transactional(propagation=Propagation.REQUIRED)
-    public void createUser(User user) {
-        List<User> users = this.listUsers();
-        
-        List<String> usernames = new ArrayList<String>();
-        List<String> emails = new ArrayList<String>();
-        users.forEach(u -> {
-            usernames.add(u.getUsername());
-            emails.add(u.getEmail());
-        });
-        
-        if (usernames.contains(user.getUsername()))
-            throw new RuntimeException("Email address is already in use.");
-        if (emails.contains(user.getEmail()))
-            throw new RuntimeException("Username already exists.");
+    public void createUser(User user) throws UserAlreadyExistsException {        
+        if (findUserByEmail(user.getEmail()) != null)
+            throw new UserAlreadyExistsException("Email address is already in use.");
+        if (findUserByUsername(user.getUsername()) != null)
+            throw new UserAlreadyExistsException("Username already exists.");
         
         user.setUserStatus("A");
         this.userRepo.save(user);
@@ -55,8 +47,7 @@ public class UserService {
     public User findUserByUsername(String username) {
         List<User> users = this.listUsers();
         users.removeIf(u -> !u.getUserStatus().equals("A"));
-        users.removeIf(u -> !u.getEmail().equals(username));
-        
+        users.removeIf(u -> !u.getUsername().equals(username));
         return users.size()==1?users.get(0):null;
     }
     
